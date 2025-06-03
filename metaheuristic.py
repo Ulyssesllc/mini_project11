@@ -25,38 +25,36 @@ def read_input():
 
 
 def calculate_route_distance(route, d):
-    """Calculate total distance of a route."""
     if len(route) < 2:
         return 0
     return sum(d[route[i]][route[i + 1]] for i in range(len(route) - 1))
 
 
 def is_valid_route(route, N, M, q, Q, taxi_id):
-    """Check if route satisfies passenger direct trips and capacity constraints."""
     if route[0] != 0 or route[-1] != 0:
         return False
-    # Check passenger direct trips
+
     for i in range(len(route) - 1):
         if 1 <= route[i] <= N:
             if route[i + 1] != route[i] + N + M:
                 return False
-    # Check pickup-drop-off pairing and capacity
+
     load = 0
     carried = set()
     for node in route:
-        if N + 1 <= node <= N + M:  # Parcel pickup
+        if N + 1 <= node <= N + M:  
             parcel_idx = node - N
             load += q[parcel_idx]
             carried.add(parcel_idx)
             if load > Q[taxi_id]:
                 return False
-        elif 2 * N + M + 1 <= node <= 2 * N + 2 * M:  # Parcel drop-off
+        elif 2 * N + M + 1 <= node <= 2 * N + 2 * M:  
             parcel_idx = node - (2 * N + M)
             if parcel_idx not in carried:
                 return False
             load -= q[parcel_idx]
             carried.remove(parcel_idx)
-    # Ensure all pickups have drop-offs
+
     pickups = set(node for node in route if 1 <= node <= N + M)
     dropoffs = set(node for node in route if N + M + 1 <= node <= 2 * N + 2 * M)
     for pu in pickups:
@@ -67,16 +65,14 @@ def is_valid_route(route, N, M, q, Q, taxi_id):
 
 
 def initial_solution(N, M, K, q, Q, d):
-    """Construct initial solution with round-robin passenger assignment and greedy parcel assignment."""
+    
     taxis_route = [[] for _ in range(K + 1)]
     taxis_passengers = [[] for _ in range(K + 1)]
 
-    # Assign passengers round-robin
     for i in range(1, N + 1):
         k = (i - 1) % K + 1
         taxis_passengers[k].append(i)
 
-    # Build initial routes for passengers
     for k in range(1, K + 1):
         route = [0]
         unvisited = set(taxis_passengers[k])
@@ -90,9 +86,8 @@ def initial_solution(N, M, K, q, Q, d):
         route.append(0)
         taxis_route[k] = route
 
-    # Greedily assign parcels
     parcels = [(q[i], i) for i in range(1, M + 1)]
-    parcels.sort(reverse=True)  # Largest quantities first
+    parcels.sort(reverse=True)  
     for _, parcel_idx in parcels:
         a = parcel_idx + N
         b = parcel_idx + 2 * N + M
@@ -120,7 +115,6 @@ def initial_solution(N, M, K, q, Q, d):
         if best_k is not None:
             taxis_route[best_k] = best_route
         else:
-            # Fallback: assign to least-loaded taxi
             k = min(
                 range(1, K + 1),
                 key=lambda k: calculate_route_distance(taxis_route[k], d)
@@ -137,13 +131,13 @@ def initial_solution(N, M, K, q, Q, d):
 
 
 def get_max_route_length(routes, d):
-    """Calculate the maximum route length among all taxis."""
+    
     return max(calculate_route_distance(route, d) for route in routes[1:])
 
 
 def neighbor_solution(routes, N, M, q, Q, d):
-    """Generate a neighbor solution by swapping or reordering."""
-    routes = [r[:] for r in routes]  # Deep copy
+   
+    routes = [r[:] for r in routes] 
     K = len(routes) - 1
     move_type = random.choice(["swap_passenger", "swap_parcel", "reorder"])
 
@@ -205,7 +199,7 @@ def neighbor_solution(routes, N, M, q, Q, d):
     elif move_type == "reorder":
         k = random.randint(1, K)
         route = routes[k]
-        if len(route) > 3:  # Need enough nodes to reorder
+        if len(route) > 3: 
             i, j = sorted(random.sample(range(1, len(route) - 1), 2))
             if all(
                 not (1 <= route[x] <= N and route[x + 1] == route[x] + N + M)
@@ -219,15 +213,15 @@ def neighbor_solution(routes, N, M, q, Q, d):
 
 
 def simulated_annealing(N, M, K, q, Q, d):
-    """Optimize routes using simulated annealing."""
+
     routes = initial_solution(N, M, K, q, Q, d)
     current_cost = get_max_route_length(routes, d)
     best_routes = [r[:] for r in routes]
     best_cost = current_cost
 
-    T = 1000.0  # Initial temperature
+    T = 1000.0  
     T_min = 0.1
-    alpha = 0.995  # Cooling rate
+    alpha = 0.995  
     max_iterations = 10000
 
     for _ in range(max_iterations):
@@ -250,7 +244,7 @@ def simulated_annealing(N, M, K, q, Q, d):
 def main():
     try:
         N, M, K, q, Q, d = read_input()
-        global taxis_passengers  # Needed for neighbor_solution
+        global taxis_passengers  
         taxis_passengers = [[] for _ in range(K + 1)]
         for i in range(1, N + 1):
             k = (i - 1) % K + 1
