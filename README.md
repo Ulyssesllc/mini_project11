@@ -6,15 +6,16 @@ K taxis (located at point 0) are scheduled to serve transport requests including
 Compute the routes for taxis satifying above contraints such that the length of the longest route among K taxis is minimal (in order to balance between lengths of taxis).
 A route of a taxi k is represented by a sequence of points visited by that route: r[0], r[1], . . ., r[Lk] in which r[0] = r[Lk] = 0 (the depot)
 
-"""
+
 Input
 Line 1: contains N, M, and K (1 <= N,M <= 500, 1 <= K <= 100)
+
 Line 2: contains q[1], q[2],  . . ., q[M] (1 <= q[i] <= 100)
+
 Line 3: contains Q[1], Q[2], . . . , Q[K] (1 <= Q[i] <= 200)
-Line i + 3 (i = 0, 1, . . ., 2N + 2M): contains the i
-th
- row of the distance matrix
-Output
+
+Line i + 3 (i = 0, 1, . . ., 2N + 2M): contains the i-th row of the distance matrix
+Output 
 Line 1: contains an integer K
 Line 2k  (k = 1, 2, . . ., K): contains a positive integer Lk
 Line 2k + 1 (k = 1, 2, . . ., K): contains a sequence of Lk integers  r[0], r[1], . . ., r[Lk]
